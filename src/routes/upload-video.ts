@@ -27,8 +27,17 @@ export async function uploadVideoRoute(app: FastifyInstance) {
         }
         const fileBaseName = path.basename(data.filename, extension); //Pegamos o nome do arquivo e o nome da extensão 
         const fileUploadName = `${fileBaseName}-${randomUUID()}-${extension}` //Unimos o nome do arquivo e extensão com um numero aleatório
-        const uploadDestination = path.resolve(__dirname, '../../tmp', fileUploadName)  //Buscamos a pasta onde o arquivo ira ficar
+        const uploadDestination = path.resolve(__dirname, '../tmp', fileUploadName)  //Buscamos a pasta onde o arquivo ira ficar
 
         await pump(data.file, fs.createWriteStream(uploadDestination)) //Conforme os dados vao chegando, vamos escrevendo o arquivo
+
+        const video = await prisma.video.create({
+            data: {
+                name: data.filename,
+                path: uploadDestination
+            }
+        })
+
+        return reply.send({video})
     })
 }
